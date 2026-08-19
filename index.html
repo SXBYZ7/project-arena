@@ -1,0 +1,672 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1.0">
+
+  <meta name="theme-color" content="#0b0d12">
+
+  <title>Project Arena</title>
+
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+  <!-- =========================
+       APP
+  ========================== -->
+
+  <div class="app">
+
+    <!-- Sidebar -->
+    <aside class="sidebar">
+
+      <div class="brand">
+        <div class="brand-icon">⚔️</div>
+
+        <div>
+          <h1>Project Arena</h1>
+          <span>Project Control Center</span>
+        </div>
+      </div>
+
+      <nav class="navigation">
+
+        <button class="nav-item active" data-page="dashboard">
+          <span>⌂</span>
+          <span>الرئيسية</span>
+        </button>
+
+        <button class="nav-item" data-page="projects">
+          <span>▣</span>
+          <span>المشاريع</span>
+        </button>
+
+        <button class="nav-item" data-page="tasks">
+          <span>✓</span>
+          <span>المهام</span>
+        </button>
+
+        <button class="nav-item" data-page="ideas">
+          <span>✦</span>
+          <span>الأفكار</span>
+        </button>
+
+      </nav>
+
+      <div class="sidebar-bottom">
+
+        <button class="nav-item" data-page="settings">
+          <span>⚙</span>
+          <span>الإعدادات</span>
+        </button>
+
+        <div class="version">
+          Project Arena V1.0
+        </div>
+
+      </div>
+
+    </aside>
+
+
+    <!-- =========================
+         MAIN
+    ========================== -->
+
+    <main class="main">
+
+      <!-- Header -->
+
+      <header class="topbar">
+
+        <div class="mobile-brand">
+          <div class="brand-icon">⚔️</div>
+
+          <strong>Project Arena</strong>
+        </div>
+
+        <div class="top-actions">
+
+          <button class="icon-button" id="themeButton">
+            ◐
+          </button>
+
+          <button class="icon-button" id="notificationButton">
+            ♢
+          </button>
+
+        </div>
+
+      </header>
+
+
+      <!-- =========================
+           DASHBOARD PAGE
+      ========================== -->
+
+      <section class="page active" id="dashboard">
+
+        <div class="page-heading">
+
+          <div>
+
+            <p class="eyebrow">
+              PROJECT CONTROL CENTER
+            </p>
+
+            <h2>
+              أهلاً بك 👋
+            </h2>
+
+            <p class="muted">
+              تابع مشاريعك وأنجز مهامك من مكان واحد.
+            </p>
+
+          </div>
+
+          <button class="primary-button" id="newProjectButton">
+            + مشروع جديد
+          </button>
+
+        </div>
+
+
+        <!-- Statistics -->
+
+        <div class="stats-grid">
+
+          <div class="stat-card">
+
+            <div class="stat-icon blue">
+              ◈
+            </div>
+
+            <div>
+
+              <span>
+                إجمالي المشاريع
+              </span>
+
+              <strong id="totalProjects">
+                0
+              </strong>
+
+            </div>
+
+          </div>
+
+
+          <div class="stat-card">
+
+            <div class="stat-icon orange">
+              ◷
+            </div>
+
+            <div>
+
+              <span>
+                قيد التطوير
+              </span>
+
+              <strong id="activeProjects">
+                0
+              </strong>
+
+            </div>
+
+          </div>
+
+
+          <div class="stat-card">
+
+            <div class="stat-icon green">
+              ✓
+            </div>
+
+            <div>
+
+              <span>
+                مكتملة
+              </span>
+
+              <strong id="completedProjects">
+                0
+              </strong>
+
+            </div>
+
+          </div>
+
+
+          <div class="stat-card">
+
+            <div class="stat-icon purple">
+              %
+            </div>
+
+            <div>
+
+              <span>
+                الإنجاز الكلي
+              </span>
+
+              <strong id="overallProgress">
+                0%
+              </strong>
+
+            </div>
+
+          </div>
+
+        </div>
+
+
+        <!-- Active Project -->
+
+        <div class="section-header">
+
+          <div>
+
+            <h3>
+              المشروع النشط
+            </h3>
+
+            <p class="muted">
+              المشروع الذي تعمل عليه حاليًا
+            </p>
+
+          </div>
+
+        </div>
+
+
+        <div id="activeProjectContainer">
+
+          <div class="empty-state">
+
+            <div class="empty-icon">
+              ⚔️
+            </div>
+
+            <h3>
+              لا يوجد مشروع بعد
+            </h3>
+
+            <p>
+              أنشئ أول مشروع لك وابدأ رحلتك.
+            </p>
+
+            <button class="primary-button" id="emptyNewProject">
+              إنشاء أول مشروع
+            </button>
+
+          </div>
+
+        </div>
+
+
+        <!-- Recent Projects -->
+
+        <div class="section-header">
+
+          <div>
+
+            <h3>
+              آخر المشاريع
+            </h3>
+
+            <p class="muted">
+              المشاريع التي تعمل عليها
+            </p>
+
+          </div>
+
+          <button class="text-button" data-page-target="projects">
+            عرض الكل
+          </button>
+
+        </div>
+
+
+        <div class="projects-grid" id="recentProjects">
+
+          <!-- Projects will be generated by JavaScript -->
+
+        </div>
+
+      </section>
+
+
+      <!-- =========================
+           PROJECTS PAGE
+      ========================== -->
+
+      <section class="page" id="projects">
+
+        <div class="page-heading">
+
+          <div>
+
+            <p class="eyebrow">
+              PROJECTS
+            </p>
+
+            <h2>
+              مشاريعي
+            </h2>
+
+            <p class="muted">
+              جميع مشاريعك في مكان واحد.
+            </p>
+
+          </div>
+
+          <button class="primary-button" id="projectsNewButton">
+            + مشروع جديد
+          </button>
+
+        </div>
+
+
+        <div class="projects-grid large" id="allProjects">
+
+          <!-- Projects generated here -->
+
+        </div>
+
+      </section>
+
+
+      <!-- =========================
+           TASKS PAGE
+      ========================== -->
+
+      <section class="page" id="tasks">
+
+        <div class="page-heading">
+
+          <div>
+
+            <p class="eyebrow">
+              TASKS
+            </p>
+
+            <h2>
+              المهام
+            </h2>
+
+            <p class="muted">
+              تابع الأشياء التي تحتاج إلى إنجازها.
+            </p>
+
+          </div>
+
+        </div>
+
+
+        <div class="tasks-container" id="tasksContainer">
+
+          <div class="empty-state">
+
+            <div class="empty-icon">
+              ✓
+            </div>
+
+            <h3>
+              لا توجد مهام
+            </h3>
+
+            <p>
+              أنشئ مشروعًا وأضف إليه مهامك.
+            </p>
+
+          </div>
+
+        </div>
+
+      </section>
+
+
+      <!-- =========================
+           IDEAS PAGE
+      ========================== -->
+
+      <section class="page" id="ideas">
+
+        <div class="page-heading">
+
+          <div>
+
+            <p class="eyebrow">
+              IDEA VAULT
+            </p>
+
+            <h2>
+              خزنة الأفكار 💡
+            </h2>
+
+            <p class="muted">
+              احفظ أفكارك حتى لا تضيع.
+            </p>
+
+          </div>
+
+          <button class="primary-button" id="newIdeaButton">
+            + فكرة جديدة
+          </button>
+
+        </div>
+
+
+        <div class="ideas-grid" id="ideasContainer">
+
+          <div class="empty-state">
+
+            <div class="empty-icon">
+              ✦
+            </div>
+
+            <h3>
+              خزنة الأفكار فارغة
+            </h3>
+
+            <p>
+              عندك فكرة؟ احفظها هنا.
+            </p>
+
+          </div>
+
+        </div>
+
+      </section>
+
+
+      <!-- =========================
+           SETTINGS
+      ========================== -->
+
+      <section class="page" id="settings">
+
+        <div class="page-heading">
+
+          <div>
+
+            <p class="eyebrow">
+              SETTINGS
+            </p>
+
+            <h2>
+              الإعدادات
+            </h2>
+
+            <p class="muted">
+              تحكم في Project Arena.
+            </p>
+
+          </div>
+
+        </div>
+
+
+        <div class="settings-card">
+
+          <div class="setting-row">
+
+            <div>
+
+              <strong>
+                المظهر
+              </strong>
+
+              <p>
+                الوضع الداكن هو المظهر الافتراضي.
+              </p>
+
+            </div>
+
+            <button class="secondary-button" id="settingsThemeButton">
+              تبديل المظهر
+            </button>
+
+          </div>
+
+
+          <div class="setting-row">
+
+            <div>
+
+              <strong>
+                البيانات
+              </strong>
+
+              <p>
+                البيانات محفوظة محليًا على جهازك.
+              </p>
+
+            </div>
+
+            <button class="danger-button" id="clearDataButton">
+              حذف البيانات
+            </button>
+
+          </div>
+
+
+          <div class="setting-row">
+
+            <div>
+
+              <strong>
+                حول المشروع
+              </strong>
+
+              <p>
+                Project Arena V1.0
+              </p>
+
+            </div>
+
+          </div>
+
+        </div>
+
+      </section>
+
+    </main>
+
+  </div>
+
+
+  <!-- =========================
+       NEW PROJECT MODAL
+  ========================== -->
+
+  <div class="modal-overlay" id="projectModal">
+
+    <div class="modal">
+
+      <button class="modal-close" id="closeProjectModal">
+        ×
+      </button>
+
+      <div class="modal-header">
+
+        <span class="modal-icon">
+          ⚔️
+        </span>
+
+        <div>
+
+          <h2>
+            مشروع جديد
+          </h2>
+
+          <p>
+            أضف مشروعك إلى Project Arena.
+          </p>
+
+        </div>
+
+      </div>
+
+
+      <form id="projectForm">
+
+        <div class="form-group">
+
+          <label for="projectName">
+            اسم المشروع
+          </label>
+
+          <input
+            id="projectName"
+            type="text"
+            placeholder="مثال: Project Arena"
+            required
+          >
+
+        </div>
+
+
+        <div class="form-group">
+
+          <label for="projectDescription">
+            وصف المشروع
+          </label>
+
+          <textarea
+            id="projectDescription"
+            placeholder="اكتب وصفًا قصيرًا..."
+            rows="4"
+          ></textarea>
+
+        </div>
+
+
+        <div class="form-group">
+
+          <label for="projectStatus">
+            الحالة
+          </label>
+
+          <select id="projectStatus">
+
+            <option value="idea">
+              💡 فكرة
+            </option>
+
+            <option value="active">
+              🟡 قيد التطوير
+            </option>
+
+            <option value="completed">
+              🟢 مكتمل
+            </option>
+
+            <option value="paused">
+              🔴 متوقف
+            </option>
+
+          </select>
+
+        </div>
+
+
+        <div class="modal-actions">
+
+          <button
+            type="button"
+            class="secondary-button"
+            id="cancelProjectButton"
+          >
+            إلغاء
+          </button>
+
+          <button
+            type="submit"
+            class="primary-button"
+          >
+            إنشاء المشروع
+          </button>
+
+        </div>
+
+      </form>
+
+    </div>
+
+  </div>
+
+
+  <!-- =========================
+       JAVASCRIPT
+  ========================== -->
+
+  <script src="app.js"></script>
+
+</body>
+</html>
