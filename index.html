@@ -2,12 +2,9 @@
 <html lang="ar" dir="rtl">
 <head>
   <meta charset="UTF-8">
-
-  <meta name="viewport"
-        content="width=device-width, initial-scale=1.0">
-
-  <meta name="theme-color" content="#0b0d12">
-
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#080a0f">
+  <meta name="description" content="Project Arena - مركز إدارة المشاريع">
   <title>Project Arena</title>
 
   <link rel="stylesheet" href="style.css">
@@ -15,87 +12,76 @@
 
 <body>
 
-  <!-- =========================
-       APP
-  ========================== -->
-
-  <div class="app">
+  <div class="app-shell">
 
     <!-- Sidebar -->
     <aside class="sidebar">
 
-      <div class="brand">
-        <div class="brand-icon">⚔️</div>
+      <div class="logo-area">
+        <div class="logo">⚔</div>
 
         <div>
           <h1>Project Arena</h1>
-          <span>Project Control Center</span>
+          <span>Project Control</span>
         </div>
       </div>
 
-      <nav class="navigation">
+      <nav class="sidebar-nav">
 
-        <button class="nav-item active" data-page="dashboard">
+        <button class="nav-link active" data-page="dashboard">
           <span>⌂</span>
-          <span>الرئيسية</span>
+          <b>الرئيسية</b>
         </button>
 
-        <button class="nav-item" data-page="projects">
+        <button class="nav-link" data-page="projects">
           <span>▣</span>
-          <span>المشاريع</span>
+          <b>المشاريع</b>
         </button>
 
-        <button class="nav-item" data-page="tasks">
+        <button class="nav-link" data-page="tasks">
           <span>✓</span>
-          <span>المهام</span>
+          <b>المهام</b>
         </button>
 
-        <button class="nav-item" data-page="ideas">
+        <button class="nav-link" data-page="ideas">
           <span>✦</span>
-          <span>الأفكار</span>
+          <b>الأفكار</b>
         </button>
 
       </nav>
 
-      <div class="sidebar-bottom">
+      <div class="sidebar-footer">
 
-        <button class="nav-item" data-page="settings">
+        <button class="nav-link" data-page="settings">
           <span>⚙</span>
-          <span>الإعدادات</span>
+          <b>الإعدادات</b>
         </button>
 
-        <div class="version">
-          Project Arena V1.0
-        </div>
+        <small>Project Arena V2.0</small>
 
       </div>
 
     </aside>
 
 
-    <!-- =========================
-         MAIN
-    ========================== -->
+    <!-- Main -->
+    <main class="main-content">
 
-    <main class="main">
-
-      <!-- Header -->
-
+      <!-- Topbar -->
       <header class="topbar">
 
-        <div class="mobile-brand">
-          <div class="brand-icon">⚔️</div>
-
+        <div class="mobile-title">
+          <div class="mini-logo">⚔</div>
           <strong>Project Arena</strong>
         </div>
 
-        <div class="top-actions">
+        <div class="topbar-actions">
 
-          <button class="icon-button" id="themeButton">
+          <button class="round-btn" id="themeButton" title="تغيير المظهر">
             ◐
           </button>
 
-          <button class="icon-button" id="notificationButton">
+          <button class="round-btn" id="notificationButton" title="الإشعارات">
             ♢
           </button>
 
@@ -104,32 +90,25 @@
       </header>
 
 
-      <!-- =========================
-           DASHBOARD PAGE
-      ========================== -->
+      <!-- ================= DASHBOARD ================= -->
 
       <section class="page active" id="dashboard">
 
-        <div class="page-heading">
+        <div class="hero">
 
           <div>
+            <span class="section-label">PROJECT CONTROL CENTER</span>
 
-            <p class="eyebrow">
-              PROJECT CONTROL CENTER
+            <h2>مرحباً بك 👋</h2>
+
+            <p>
+              أدِر مشاريعك، تابع تقدمك، وحوّل أفكارك إلى إنجازات.
             </p>
-
-            <h2>
-              أهلاً بك 👋
-            </h2>
-
-            <p class="muted">
-              تابع مشاريعك وأنجز مهامك من مكان واحد.
-            </p>
-
           </div>
 
-          <button class="primary-button" id="newProjectButton">
-            + مشروع جديد
+          <button class="primary-btn" id="newProjectButton">
+            <span>＋</span>
+            مشروع جديد
           </button>
 
         </div>
@@ -137,89 +116,45 @@
 
         <!-- Statistics -->
 
-        <div class="stats-grid">
+        <div class="stats">
 
           <div class="stat-card">
-
-            <div class="stat-icon blue">
-              ◈
-            </div>
+            <div class="stat-symbol blue">◈</div>
 
             <div>
-
-              <span>
-                إجمالي المشاريع
-              </span>
-
-              <strong id="totalProjects">
-                0
-              </strong>
-
+              <span>إجمالي المشاريع</span>
+              <strong id="totalProjects">0</strong>
             </div>
-
           </div>
 
 
           <div class="stat-card">
-
-            <div class="stat-icon orange">
-              ◷
-            </div>
+            <div class="stat-symbol orange">◷</div>
 
             <div>
-
-              <span>
-                قيد التطوير
-              </span>
-
-              <strong id="activeProjects">
-                0
-              </strong>
-
+              <span>قيد التطوير</span>
+              <strong id="activeProjects">0</strong>
             </div>
-
           </div>
 
 
           <div class="stat-card">
-
-            <div class="stat-icon green">
-              ✓
-            </div>
+            <div class="stat-symbol green">✓</div>
 
             <div>
-
-              <span>
-                مكتملة
-              </span>
-
-              <strong id="completedProjects">
-                0
-              </strong>
-
+              <span>مكتملة</span>
+              <strong id="completedProjects">0</strong>
             </div>
-
           </div>
 
 
           <div class="stat-card">
-
-            <div class="stat-icon purple">
-              %
-            </div>
+            <div class="stat-symbol purple">%</div>
 
             <div>
-
-              <span>
-                الإنجاز الكلي
-              </span>
-
-              <strong id="overallProgress">
-                0%
-              </strong>
-
+              <span>الإنجاز الكلي</span>
+              <strong id="overallProgress">0%</strong>
             </div>
-
           </div>
 
         </div>
@@ -227,307 +162,167 @@
 
         <!-- Active Project -->
 
-        <div class="section-header">
-
+        <div class="section-title">
           <div>
-
-            <h3>
-              المشروع النشط
-            </h3>
-
-            <p class="muted">
-              المشروع الذي تعمل عليه حاليًا
-            </p>
-
+            <h3>المشروع النشط</h3>
+            <p>المشروع الذي تعمل عليه حاليًا</p>
           </div>
-
         </div>
 
-
-        <div id="activeProjectContainer">
-
-          <div class="empty-state">
-
-            <div class="empty-icon">
-              ⚔️
-            </div>
-
-            <h3>
-              لا يوجد مشروع بعد
-            </h3>
-
-            <p>
-              أنشئ أول مشروع لك وابدأ رحلتك.
-            </p>
-
-            <button class="primary-button" id="emptyNewProject">
-              إنشاء أول مشروع
-            </button>
-
-          </div>
-
-        </div>
+        <div id="activeProjectContainer"></div>
 
 
         <!-- Recent Projects -->
 
-        <div class="section-header">
-
+        <div class="section-title">
           <div>
-
-            <h3>
-              آخر المشاريع
-            </h3>
-
-            <p class="muted">
-              المشاريع التي تعمل عليها
-            </p>
-
+            <h3>آخر المشاريع</h3>
+            <p>آخر المشاريع التي أضفتها</p>
           </div>
 
-          <button class="text-button" data-page-target="projects">
+          <button class="link-btn" data-page-target="projects">
             عرض الكل
           </button>
-
         </div>
 
-
-        <div class="projects-grid" id="recentProjects">
-
-          <!-- Projects will be generated by JavaScript -->
-
-        </div>
+        <div class="project-grid" id="recentProjects"></div>
 
       </section>
 
 
-      <!-- =========================
-           PROJECTS PAGE
-      ========================== -->
+      <!-- ================= PROJECTS ================= -->
 
       <section class="page" id="projects">
 
-        <div class="page-heading">
+        <div class="hero">
 
           <div>
+            <span class="section-label">PROJECTS</span>
 
-            <p class="eyebrow">
-              PROJECTS
-            </p>
+            <h2>المشاريع</h2>
 
-            <h2>
-              مشاريعي
-            </h2>
-
-            <p class="muted">
+            <p>
               جميع مشاريعك في مكان واحد.
             </p>
-
           </div>
 
-          <button class="primary-button" id="projectsNewButton">
-            + مشروع جديد
+          <button class="primary-btn" id="projectsNewButton">
+            <span>＋</span>
+            مشروع جديد
           </button>
 
         </div>
 
-
-        <div class="projects-grid large" id="allProjects">
-
-          <!-- Projects generated here -->
-
-        </div>
+        <div class="project-grid" id="allProjects"></div>
 
       </section>
 
 
-      <!-- =========================
-           TASKS PAGE
-      ========================== -->
+      <!-- ================= TASKS ================= -->
 
       <section class="page" id="tasks">
 
-        <div class="page-heading">
+        <div class="hero">
 
           <div>
+            <span class="section-label">TASKS</span>
 
-            <p class="eyebrow">
-              TASKS
-            </p>
-
-            <h2>
-              المهام
-            </h2>
-
-            <p class="muted">
-              تابع الأشياء التي تحتاج إلى إنجازها.
-            </p>
-
-          </div>
-
-        </div>
-
-
-        <div class="tasks-container" id="tasksContainer">
-
-          <div class="empty-state">
-
-            <div class="empty-icon">
-              ✓
-            </div>
-
-            <h3>
-              لا توجد مهام
-            </h3>
+            <h2>المهام</h2>
 
             <p>
-              أنشئ مشروعًا وأضف إليه مهامك.
+              تابع المهام التي تحتاج إلى إنجازها.
             </p>
-
           </div>
 
         </div>
+
+        <div class="tasks-list" id="tasksContainer"></div>
 
       </section>
 
 
-      <!-- =========================
-           IDEAS PAGE
-      ========================== -->
+      <!-- ================= IDEAS ================= -->
 
       <section class="page" id="ideas">
 
-        <div class="page-heading">
+        <div class="hero">
 
           <div>
+            <span class="section-label">IDEA VAULT</span>
 
-            <p class="eyebrow">
-              IDEA VAULT
+            <h2>خزنة الأفكار 💡</h2>
+
+            <p>
+              لا تخلي أي فكرة تضيع.
             </p>
-
-            <h2>
-              خزنة الأفكار 💡
-            </h2>
-
-            <p class="muted">
-              احفظ أفكارك حتى لا تضيع.
-            </p>
-
           </div>
 
-          <button class="primary-button" id="newIdeaButton">
-            + فكرة جديدة
+          <button class="primary-btn" id="newIdeaButton">
+            <span>＋</span>
+            فكرة جديدة
           </button>
 
         </div>
 
-
-        <div class="ideas-grid" id="ideasContainer">
-
-          <div class="empty-state">
-
-            <div class="empty-icon">
-              ✦
-            </div>
-
-            <h3>
-              خزنة الأفكار فارغة
-            </h3>
-
-            <p>
-              عندك فكرة؟ احفظها هنا.
-            </p>
-
-          </div>
-
-        </div>
+        <div class="idea-grid" id="ideasContainer"></div>
 
       </section>
 
 
-      <!-- =========================
-           SETTINGS
-      ========================== -->
+      <!-- ================= SETTINGS ================= -->
 
       <section class="page" id="settings">
 
-        <div class="page-heading">
+        <div class="hero">
 
           <div>
+            <span class="section-label">SETTINGS</span>
 
-            <p class="eyebrow">
-              SETTINGS
+            <h2>الإعدادات</h2>
+
+            <p>
+              تحكم في إعدادات Project Arena.
             </p>
-
-            <h2>
-              الإعدادات
-            </h2>
-
-            <p class="muted">
-              تحكم في Project Arena.
-            </p>
-
           </div>
 
         </div>
 
 
-        <div class="settings-card">
+        <div class="settings-panel">
 
-          <div class="setting-row">
+          <div class="setting-item">
 
             <div>
-
-              <strong>
-                المظهر
-              </strong>
-
-              <p>
-                الوضع الداكن هو المظهر الافتراضي.
-              </p>
-
+              <strong>المظهر</strong>
+              <p>التبديل بين الوضع الداكن والفاتح.</p>
             </div>
 
-            <button class="secondary-button" id="settingsThemeButton">
+            <button class="secondary-btn" id="settingsThemeButton">
               تبديل المظهر
             </button>
 
           </div>
 
 
-          <div class="setting-row">
+          <div class="setting-item">
 
             <div>
-
-              <strong>
-                البيانات
-              </strong>
-
-              <p>
-                البيانات محفوظة محليًا على جهازك.
-              </p>
-
+              <strong>البيانات</strong>
+              <p>البيانات محفوظة محليًا على هذا الجهاز.</p>
             </div>
 
-            <button class="danger-button" id="clearDataButton">
+            <button class="danger-btn" id="clearDataButton">
               حذف البيانات
             </button>
 
           </div>
 
 
-          <div class="setting-row">
+          <div class="setting-item">
 
             <div>
-
-              <strong>
-                حول المشروع
-              </strong>
-
-              <p>
-                Project Arena V1.0
-              </p>
-
+              <strong>الإصدار</strong>
+              <p>Project Arena V2.0</p>
             </div>
 
           </div>
@@ -541,34 +336,23 @@
   </div>
 
 
-  <!-- =========================
-       NEW PROJECT MODAL
-  ========================== -->
+  <!-- ================= PROJECT MODAL ================= -->
 
   <div class="modal-overlay" id="projectModal">
 
     <div class="modal">
 
-      <button class="modal-close" id="closeProjectModal">
+      <button class="close-modal" id="closeProjectModal">
         ×
       </button>
 
-      <div class="modal-header">
+      <div class="modal-title">
 
-        <span class="modal-icon">
-          ⚔️
-        </span>
+        <div class="modal-icon">⚔</div>
 
         <div>
-
-          <h2>
-            مشروع جديد
-          </h2>
-
-          <p>
-            أضف مشروعك إلى Project Arena.
-          </p>
-
+          <h2>مشروع جديد</h2>
+          <p>أضف مشروعًا جديدًا إلى الساحة.</p>
         </div>
 
       </div>
@@ -576,71 +360,52 @@
 
       <form id="projectForm">
 
-        <div class="form-group">
-
-          <label for="projectName">
-            اسم المشروع
-          </label>
+        <label>
+          اسم المشروع
 
           <input
             id="projectName"
             type="text"
-            placeholder="مثال: Project Arena"
+            placeholder="مثال: تطبيق المدرسة"
             required
           >
+        </label>
 
-        </div>
 
-
-        <div class="form-group">
-
-          <label for="projectDescription">
-            وصف المشروع
-          </label>
+        <label>
+          وصف المشروع
 
           <textarea
             id="projectDescription"
-            placeholder="اكتب وصفًا قصيرًا..."
             rows="4"
+            placeholder="اكتب وصفًا مختصرًا للمشروع..."
           ></textarea>
+        </label>
 
-        </div>
 
-
-        <div class="form-group">
-
-          <label for="projectStatus">
-            الحالة
-          </label>
+        <label>
+          حالة المشروع
 
           <select id="projectStatus">
 
-            <option value="idea">
-              💡 فكرة
-            </option>
+            <option value="idea">💡 فكرة</option>
 
-            <option value="active">
-              🟡 قيد التطوير
-            </option>
+            <option value="active">🟡 قيد التطوير</option>
 
-            <option value="completed">
-              🟢 مكتمل
-            </option>
+            <option value="completed">🟢 مكتمل</option>
 
-            <option value="paused">
-              🔴 متوقف
-            </option>
+            <option value="paused">🔴 متوقف</option>
 
           </select>
 
-        </div>
+        </label>
 
 
-        <div class="modal-actions">
+        <div class="modal-buttons">
 
           <button
             type="button"
-            class="secondary-button"
+            class="secondary-btn"
             id="cancelProjectButton"
           >
             إلغاء
@@ -648,7 +413,7 @@
 
           <button
             type="submit"
-            class="primary-button"
+            class="primary-btn"
           >
             إنشاء المشروع
           </button>
@@ -661,10 +426,6 @@
 
   </div>
 
-
-  <!-- =========================
-       JAVASCRIPT
-  ========================== -->
 
   <script src="app.js"></script>
 
