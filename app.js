@@ -1,1355 +1,453 @@
-/* =====================================================
-   PROJECT ARENA V1
-   APP ENGINE
-===================================================== */
+/* =========================================================
+   PROJECT ARENA V2
+   STYLE SYSTEM
+========================================================= */
 
-"use strict";
+:root {
+  --bg: #080a0f;
+  --bg-2: #0c0f16;
+  --surface: #11151d;
+  --surface-2: #151a23;
+  --surface-3: #1a202b;
 
-/* =====================================================
-   STORAGE
-===================================================== */
+  --border: rgba(255, 255, 255, 0.075);
+  --border-hover: rgba(255, 255, 255, 0.14);
 
-const STORAGE_KEY = "project_arena_v1";
+  --text: #f4f6fa;
+  --muted: #8c94a3;
+  --muted-2: #646d7d;
 
-let state = {
-  projects: [],
-  ideas: [],
-  theme: "dark"
-};
+  --primary: #7c5cff;
+  --primary-2: #6245dc;
+  --primary-soft: rgba(124, 92, 255, 0.12);
+
+  --blue: #4b9cff;
+  --green: #35d99a;
+  --orange: #ffad51;
+  --red: #ff5f76;
+  --purple: #a179ff;
+
+  --sidebar: 245px;
+  --radius: 18px;
+
+  --shadow:
+    0 20px 60px rgba(0, 0, 0, 0.28);
+
+  --transition: 0.2s ease;
+}
 
 
-/* =====================================================
-   DOM HELPERS
-===================================================== */
+/* =========================================================
+   RESET
+========================================================= */
 
-const $ = (selector) => document.querySelector(selector);
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
 
-const $$ = (selector) => document.querySelectorAll(selector);
+html {
+  min-height: 100%;
+  scroll-behavior: smooth;
+}
+
+body {
+  min-height: 100vh;
+
+  background:
+    radial-gradient(
+      circle at 85% 0%,
+      rgba(124, 92, 255, 0.10),
+      transparent 30%
+    ),
+    radial-gradient(
+      circle at 10% 80%,
+      rgba(77, 156, 255, 0.035),
+      transparent 28%
+    ),
+    var(--bg);
+
+  color: var(--text);
+
+  font-family:
+    "Segoe UI",
+    Tahoma,
+    Arial,
+    sans-serif;
+
+  line-height: 1.6;
+
+  overflow-x: hidden;
+}
+
+button,
+input,
+textarea,
+select {
+  font-family: inherit;
+}
+
+button {
+  -webkit-tap-highlight-color: transparent;
+}
+
+button:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+::selection {
+  background: rgba(124, 92, 255, 0.35);
+  color: #fff;
+}
 
 
-/* =====================================================
-   LOAD DATA
-===================================================== */
+/* =========================================================
+   SCROLLBAR
+========================================================= */
 
-function loadState() {
+::-webkit-scrollbar {
+  width: 7px;
+}
 
-  try {
+::-webkit-scrollbar-track {
+  background: transparent;
+}
 
-    const saved = localStorage.getItem(STORAGE_KEY);
+::-webkit-scrollbar-thumb {
+  background: #252b36;
+  border-radius: 50px;
+}
 
-    if (saved) {
+::-webkit-scrollbar-thumb:hover {
+  background: #343c4b;
+}
 
-      const parsed = JSON.parse(saved);
 
-      state = {
-        ...state,
-        ...parsed
-      };
+/* =========================================================
+   APP SHELL
+========================================================= */
 
-    }
+.app-shell {
+  min-height: 100vh;
+}
 
-  } catch (error) {
 
-    console.error(
-      "Failed to load Project Arena data:",
-      error
+/* =========================================================
+   SIDEBAR
+========================================================= */
+
+.sidebar {
+  position: fixed;
+
+  top: 0;
+  right: 0;
+
+  width: var(--sidebar);
+  height: 100vh;
+
+  padding: 22px 15px;
+
+  display: flex;
+  flex-direction: column;
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(17, 21, 29, 0.98),
+      rgba(8, 10, 15, 0.99)
     );
 
-  }
+  border-left: 1px solid var(--border);
 
+  z-index: 1000;
 }
 
 
-/* =====================================================
-   SAVE DATA
-===================================================== */
+/* =========================================================
+   LOGO
+========================================================= */
 
-function saveState() {
+.logo-area {
+  display: flex;
 
-  localStorage.setItem(
-    STORAGE_KEY,
-    JSON.stringify(state)
-  );
+  align-items: center;
 
+  gap: 11px;
+
+  padding:
+    2px
+    8px
+    27px;
 }
 
+.logo {
+  width: 43px;
+  height: 43px;
 
-/* =====================================================
-   ID GENERATOR
-===================================================== */
+  flex-shrink: 0;
 
-function generateId() {
+  display: grid;
+  place-items: center;
 
-  return (
-    Date.now().toString(36) +
-    Math.random()
-      .toString(36)
-      .substring(2, 8)
-  );
+  border-radius: 13px;
 
-}
+  color: #fff;
 
+  font-size: 20px;
 
-/* =====================================================
-   ESCAPE HTML
-===================================================== */
-
-function escapeHTML(value) {
-
-  return String(value ?? "")
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;")
-    .replaceAll('"', "&quot;")
-    .replaceAll("'", "&#039;");
-
-}
-
-
-/* =====================================================
-   STATUS
-===================================================== */
-
-function getStatusLabel(status) {
-
-  const labels = {
-
-    idea: "💡 فكرة",
-
-    active: "🟡 قيد التطوير",
-
-    completed: "🟢 مكتمل",
-
-    paused: "🔴 متوقف"
-
-  };
-
-  return labels[status] || "💡 فكرة";
-
-}
-
-
-/* =====================================================
-   PROJECT PROGRESS
-===================================================== */
-
-function calculateProjectProgress(project) {
-
-  if (!project.tasks || project.tasks.length === 0) {
-
-    return project.progress || 0;
-
-  }
-
-  const completed =
-    project.tasks.filter(
-      task => task.completed
-    ).length;
-
-  return Math.round(
-    (completed / project.tasks.length) * 100
-  );
-
-}
-
-
-/* =====================================================
-   NAVIGATION
-===================================================== */
-
-function navigateTo(pageId) {
-
-  $$(".page").forEach(page => {
-
-    page.classList.remove("active");
-
-  });
-
-
-  const target = $(`#${pageId}`);
-
-  if (!target) return;
-
-  target.classList.add("active");
-
-
-  $$(".nav-item").forEach(item => {
-
-    item.classList.remove("active");
-
-    if (
-      item.dataset.page === pageId
-    ) {
-
-      item.classList.add("active");
-
-    }
-
-  });
-
-
-  window.scrollTo({
-    top: 0,
-    behavior: "smooth"
-  });
-
-
-  renderAll();
-
-}
-
-
-/* =====================================================
-   NAV BUTTONS
-===================================================== */
-
-$$(".nav-item").forEach(button => {
-
-  button.addEventListener(
-    "click",
-    () => {
-
-      const page =
-        button.dataset.page;
-
-      if (!page) return;
-
-      navigateTo(page);
-
-    }
-  );
-
-});
-
-
-$$("[data-page-target]").forEach(button => {
-
-  button.addEventListener(
-    "click",
-    () => {
-
-      const page =
-        button.dataset.pageTarget;
-
-      navigateTo(page);
-
-    }
-  );
-
-});
-
-
-/* =====================================================
-   PROJECT MODAL
-===================================================== */
-
-const projectModal =
-  $("#projectModal");
-
-
-function openProjectModal() {
-
-  projectModal.classList.add("show");
-
-  setTimeout(() => {
-
-    $("#projectName").focus();
-
-  }, 100);
-
-}
-
-
-function closeProjectModal() {
-
-  projectModal.classList.remove("show");
-
-  $("#projectForm").reset();
-
-}
-
-
-$("#newProjectButton")
-  ?.addEventListener(
-    "click",
-    openProjectModal
-  );
-
-
-$("#projectsNewButton")
-  ?.addEventListener(
-    "click",
-    openProjectModal
-  );
-
-
-$("#emptyNewProject")
-  ?.addEventListener(
-    "click",
-    openProjectModal
-  );
-
-
-$("#closeProjectModal")
-  ?.addEventListener(
-    "click",
-    closeProjectModal
-  );
-
-
-$("#cancelProjectButton")
-  ?.addEventListener(
-    "click",
-    closeProjectModal
-  );
-
-
-projectModal?.addEventListener(
-  "click",
-  event => {
-
-    if (
-      event.target === projectModal
-    ) {
-
-      closeProjectModal();
-
-    }
-
-  }
-);
-
-
-/* =====================================================
-   CREATE PROJECT
-===================================================== */
-
-$("#projectForm")
-  ?.addEventListener(
-    "submit",
-    event => {
-
-      event.preventDefault();
-
-
-      const name =
-        $("#projectName")
-          .value
-          .trim();
-
-      const description =
-        $("#projectDescription")
-          .value
-          .trim();
-
-      const status =
-        $("#projectStatus")
-          .value;
-
-
-      if (!name) {
-
-        return;
-
-      }
-
-
-      const project = {
-
-        id: generateId(),
-
-        name,
-
-        description,
-
-        status,
-
-        createdAt:
-          new Date().toISOString(),
-
-        updatedAt:
-          new Date().toISOString(),
-
-        progress: 0,
-
-        tasks: []
-
-      };
-
-
-      state.projects.unshift(project);
-
-
-      saveState();
-
-      closeProjectModal();
-
-      renderAll();
-
-      navigateTo("projects");
-
-    }
-  );
-
-
-/* =====================================================
-   RENDER STATISTICS
-===================================================== */
-
-function renderStatistics() {
-
-  const total =
-    state.projects.length;
-
-
-  const active =
-    state.projects.filter(
-      project =>
-        project.status === "active"
-    ).length;
-
-
-  const completed =
-    state.projects.filter(
-      project =>
-        project.status === "completed"
-    ).length;
-
-
-  let overall = 0;
-
-
-  if (total > 0) {
-
-    const totalProgress =
-      state.projects.reduce(
-        (sum, project) => {
-
-          return (
-            sum +
-            calculateProjectProgress(
-              project
-            )
-          );
-
-        },
-        0
-      );
-
-
-    overall =
-      Math.round(
-        totalProgress / total
-      );
-
-  }
-
-
-  $("#totalProjects").textContent =
-    total;
-
-  $("#activeProjects").textContent =
-    active;
-
-  $("#completedProjects").textContent =
-    completed;
-
-  $("#overallProgress").textContent =
-    `${overall}%`;
-
-}
-
-
-/* =====================================================
-   PROJECT CARD
-===================================================== */
-
-function createProjectCard(project) {
-
-  const progress =
-    calculateProjectProgress(project);
-
-
-  const card =
-    document.createElement("article");
-
-
-  card.className =
-    "project-card";
-
-
-  card.dataset.projectId =
-    project.id;
-
-
-  card.innerHTML = `
-
-    <div class="project-top">
-
-      <div>
-
-        <div class="project-title">
-          ${escapeHTML(project.name)}
-        </div>
-
-        <div class="project-description">
-          ${
-            escapeHTML(
-              project.description ||
-              "لا يوجد وصف للمشروع."
-            )
-          }
-        </div>
-
-      </div>
-
-      <span class="status ${project.status}">
-        ${getStatusLabel(project.status)}
-      </span>
-
-    </div>
-
-
-    <div class="progress-area">
-
-      <div class="progress-header">
-
-        <span>
-          التقدم
-        </span>
-
-        <strong>
-          ${progress}%
-        </strong>
-
-      </div>
-
-      <div class="progress-bar">
-
-        <div
-          class="progress-value"
-          style="width:${progress}%"
-        ></div>
-
-      </div>
-
-    </div>
-
-  `;
-
-
-  card.addEventListener(
-    "click",
-    () => {
-
-      openProjectDetails(
-        project.id
-      );
-
-    }
-  );
-
-
-  return card;
-
-}
-
-
-/* =====================================================
-   RENDER RECENT PROJECTS
-===================================================== */
-
-function renderRecentProjects() {
-
-  const container =
-    $("#recentProjects");
-
-
-  container.innerHTML = "";
-
-
-  if (
-    state.projects.length === 0
-  ) {
-
-    container.innerHTML = `
-
-      <div class="empty-state">
-
-        <div class="empty-icon">
-          📁
-        </div>
-
-        <h3>
-          لا توجد مشاريع
-        </h3>
-
-        <p>
-          أنشئ مشروعك الأول.
-        </p>
-
-      </div>
-
-    `;
-
-    return;
-
-  }
-
-
-  state.projects
-    .slice(0, 6)
-    .forEach(project => {
-
-      container.appendChild(
-        createProjectCard(project)
-      );
-
-    });
-
-}
-
-
-/* =====================================================
-   RENDER ALL PROJECTS
-===================================================== */
-
-function renderAllProjects() {
-
-  const container =
-    $("#allProjects");
-
-
-  container.innerHTML = "";
-
-
-  if (
-    state.projects.length === 0
-  ) {
-
-    container.innerHTML = `
-
-      <div class="empty-state">
-
-        <div class="empty-icon">
-          ⚔️
-        </div>
-
-        <h3>
-          ساحة المشاريع فارغة
-        </h3>
-
-        <p>
-          أنشئ مشروعًا وابدأ العمل.
-        </p>
-
-      </div>
-
-    `;
-
-    return;
-
-  }
-
-
-  state.projects.forEach(
-    project => {
-
-      container.appendChild(
-        createProjectCard(project)
-      );
-
-    }
-  );
-
-}
-
-
-/* =====================================================
-   ACTIVE PROJECT
-===================================================== */
-
-function renderActiveProject() {
-
-  const container =
-    $("#activeProjectContainer");
-
-
-  const activeProject =
-    state.projects.find(
-      project =>
-        project.status === "active"
+  background:
+    linear-gradient(
+      135deg,
+      var(--primary),
+      var(--primary-2)
     );
 
+  box-shadow:
+    0 12px 30px rgba(124, 92, 255, 0.22);
+}
 
-  if (!activeProject) {
+.logo-area h1 {
+  font-size: 15px;
 
-    container.innerHTML = `
+  font-weight: 800;
 
-      <div class="empty-state">
+  letter-spacing: -0.3px;
 
-        <div class="empty-icon">
-          ⚔️
-        </div>
+  white-space: nowrap;
+}
 
-        <h3>
-          لا يوجد مشروع نشط
-        </h3>
+.logo-area span {
+  display: block;
 
-        <p>
-          أنشئ مشروعًا أو غيّر حالة مشروع إلى قيد التطوير.
-        </p>
+  margin-top: 1px;
 
-        <button
-          class="primary-button"
-          id="emptyNewProject"
-        >
-          إنشاء مشروع
-        </button>
+  color: var(--muted-2);
 
-      </div>
+  font-size: 9px;
 
-    `;
+  letter-spacing: 0.7px;
+
+  text-transform: uppercase;
+}
 
 
-    $("#emptyNewProject")
-      ?.addEventListener(
-        "click",
-        openProjectModal
-      );
+/* =========================================================
+   SIDEBAR NAV
+========================================================= */
 
+.sidebar-nav {
+  display: flex;
 
-    return;
+  flex-direction: column;
 
-  }
+  gap: 6px;
+}
 
+.nav-link {
+  width: 100%;
 
-  const progress =
-    calculateProjectProgress(
-      activeProject
+  min-height: 45px;
+
+  padding: 9px 12px;
+
+  display: flex;
+
+  align-items: center;
+
+  gap: 11px;
+
+  border: 1px solid transparent;
+
+  border-radius: 12px;
+
+  background: transparent;
+
+  color: var(--muted);
+
+  cursor: pointer;
+
+  text-align: right;
+
+  transition:
+    background var(--transition),
+    color var(--transition),
+    border-color var(--transition),
+    transform var(--transition);
+}
+
+.nav-link span {
+  width: 22px;
+
+  display: grid;
+  place-items: center;
+
+  color: #737c8c;
+
+  font-size: 17px;
+}
+
+.nav-link b {
+  font-size: 12px;
+
+  font-weight: 600;
+}
+
+.nav-link:hover {
+  color: var(--text);
+
+  background:
+    rgba(255, 255, 255, 0.035);
+
+  border-color: var(--border);
+
+  transform: translateX(-2px);
+}
+
+.nav-link:hover span {
+  color: var(--text);
+}
+
+.nav-link.active {
+  color: #fff;
+
+  background:
+    linear-gradient(
+      90deg,
+      rgba(124, 92, 255, 0.17),
+      rgba(124, 92, 255, 0.055)
     );
 
+  border-color:
+    rgba(124, 92, 255, 0.17);
+}
 
-  container.innerHTML = `
-
-    <div class="project-card">
-
-      <div class="project-top">
-
-        <div>
-
-          <div class="project-title">
-            ${escapeHTML(
-              activeProject.name
-            )}
-          </div>
-
-          <div class="project-description">
-            ${
-              escapeHTML(
-                activeProject.description ||
-                "مشروع قيد التطوير."
-              )
-            }
-          </div>
-
-        </div>
-
-        <span class="status active">
-          🟡 قيد التطوير
-        </span>
-
-      </div>
-
-
-      <div class="progress-area">
-
-        <div class="progress-header">
-
-          <span>
-            نسبة الإنجاز
-          </span>
-
-          <strong>
-            ${progress}%
-          </strong>
-
-        </div>
-
-        <div class="progress-bar">
-
-          <div
-            class="progress-value"
-            style="width:${progress}%"
-          ></div>
-
-        </div>
-
-      </div>
-
-    </div>
-
-  `;
-
+.nav-link.active span {
+  color: var(--primary);
 }
 
 
-/* =====================================================
-   OPEN PROJECT DETAILS
-===================================================== */
+/* =========================================================
+   SIDEBAR FOOTER
+========================================================= */
 
-function openProjectDetails(projectId) {
+.sidebar-footer {
+  margin-top: auto;
+}
 
-  const project =
-    state.projects.find(
-      item =>
-        item.id === projectId
+.sidebar-footer small {
+  display: block;
+
+  margin-top: 15px;
+
+  color: #505968;
+
+  font-size: 9px;
+
+  text-align: center;
+}
+
+
+/* =========================================================
+   MAIN
+========================================================= */
+
+.main-content {
+  min-height: 100vh;
+
+  margin-right: var(--sidebar);
+
+  padding:
+    0
+    34px
+    60px;
+}
+
+
+/* =========================================================
+   TOPBAR
+========================================================= */
+
+.topbar {
+  height: 74px;
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: space-between;
+
+  border-bottom: 1px solid var(--border);
+
+  margin-bottom: 34px;
+}
+
+.mobile-title {
+  display: none;
+
+  align-items: center;
+
+  gap: 9px;
+}
+
+.mobile-title strong {
+  font-size: 13px;
+}
+
+.mini-logo {
+  width: 34px;
+  height: 34px;
+
+  display: grid;
+  place-items: center;
+
+  border-radius: 10px;
+
+  background:
+    linear-gradient(
+      135deg,
+      var(--primary),
+      var(--primary-2)
     );
 
-
-  if (!project) return;
-
-
-  const taskText =
-    project.tasks
-      .map(
-        task =>
-          `${task.completed ? "✓" : "○"} ${task.title}`
-      )
-      .join("\n");
-
-
-  const action =
-    confirm(
-      `📁 ${project.name}\n\n` +
-      `الحالة: ${getStatusLabel(project.status)}\n` +
-      `الإنجاز: ${calculateProjectProgress(project)}%\n\n` +
-      `المهام:\n` +
-      (taskText || "لا توجد مهام") +
-      `\n\n` +
-      `هل تريد إضافة مهمة؟`
-    );
-
-
-  if (action) {
-
-    addTaskToProject(project);
-
-  }
-
+  font-size: 16px;
 }
 
+.topbar-actions {
+  display: flex;
 
-/* =====================================================
-   ADD TASK
-===================================================== */
-
-function addTaskToProject(project) {
-
-  const title =
-    prompt(
-      `إضافة مهمة إلى:\n${project.name}`
-    );
-
-
-  if (!title) return;
-
-
-  project.tasks.push({
-
-    id: generateId(),
-
-    title: title.trim(),
-
-    completed: false,
-
-    createdAt:
-      new Date().toISOString()
-
-  });
-
-
-  project.updatedAt =
-    new Date().toISOString();
-
-
-  saveState();
-
-  renderAll();
-
+  gap: 8px;
 }
 
+.round-btn {
+  width: 40px;
+  height: 40px;
 
-/* =====================================================
-   RENDER TASKS
-===================================================== */
+  display: grid;
+  place-items: center;
 
-function renderTasks() {
+  border: 1px solid var(--border);
 
-  const container =
-    $("#tasksContainer");
+  border-radius: 11px;
 
+  background: var(--surface);
 
-  container.innerHTML = "";
+  color: var(--muted);
 
+  cursor: pointer;
 
-  const tasks = [];
+  font-size: 16px;
 
-
-  state.projects.forEach(
-    project => {
-
-      (project.tasks || [])
-        .forEach(task => {
-
-          tasks.push({
-
-            ...task,
-
-            projectId: project.id,
-
-            projectName:
-              project.name
-
-          });
-
-        });
-
-    }
-  );
-
-
-  if (tasks.length === 0) {
-
-    container.innerHTML = `
-
-      <div class="empty-state">
-
-        <div class="empty-icon">
-          ✓
-        </div>
-
-        <h3>
-          لا توجد مهام
-        </h3>
-
-        <p>
-          أضف مهامًا إلى مشاريعك.
-        </p>
-
-      </div>
-
-    `;
-
-    return;
-
-  }
-
-
-  tasks.forEach(task => {
-
-    const item =
-      document.createElement("div");
-
-
-    item.className =
-      "task-item";
-
-
-    item.innerHTML = `
-
-      <button
-        class="task-check ${
-          task.completed
-            ? "completed"
-            : ""
-        }"
-        aria-label="تغيير حالة المهمة"
-      >
-        ${
-          task.completed
-            ? "✓"
-            : ""
-        }
-      </button>
-
-
-      <div
-        class="task-name ${
-          task.completed
-            ? "completed"
-            : ""
-        }"
-      >
-
-        ${escapeHTML(task.title)}
-
-        <small
-          style="
-            display:block;
-            color:#6f7786;
-            font-size:9px;
-          "
-        >
-          ${escapeHTML(task.projectName)}
-        </small>
-
-      </div>
-
-    `;
-
-
-    item
-      .querySelector(".task-check")
-      .addEventListener(
-        "click",
-        () => {
-
-          toggleTask(
-            task.projectId,
-            task.id
-          );
-
-        }
-      );
-
-
-    container.appendChild(item);
-
-  });
-
+  transition: var(--transition);
 }
 
+.round-btn:hover {
+  color: var(--text);
 
-/* =====================================================
-   TOGGLE TASK
-===================================================== */
+  background: var(--surface-2);
 
-function toggleTask(
-  projectId,
-  taskId
-) {
-
-  const project =
-    state.projects.find(
-      item =>
-        item.id === projectId
-    );
-
-
-  if (!project) return;
-
-
-  const task =
-    project.tasks.find(
-      item =>
-        item.id === taskId
-    );
-
-
-  if (!task) return;
-
-
-  task.completed =
-    !task.completed;
-
-
-  project.progress =
-    calculateProjectProgress(
-      project
-    );
-
-
-  project.updatedAt =
-    new Date().toISOString();
-
-
-  saveState();
-
-  renderAll();
-
-}
-
-
-/* =====================================================
-   IDEAS
-===================================================== */
-
-function renderIdeas() {
-
-  const container =
-    $("#ideasContainer");
-
-
-  container.innerHTML = "";
-
-
-  if (
-    state.ideas.length === 0
-  ) {
-
-    container.innerHTML = `
-
-      <div class="empty-state">
-
-        <div class="empty-icon">
-          ✦
-        </div>
-
-        <h3>
-          خزنة الأفكار فارغة
-        </h3>
-
-        <p>
-          عندك فكرة؟ احفظها هنا.
-        </p>
-
-      </div>
-
-    `;
-
-    return;
-
-  }
-
-
-  state.ideas.forEach(
-    idea => {
-
-      const card =
-        document.createElement(
-          "article"
-        );
-
-
-      card.className =
-        "idea-card";
-
-
-      card.innerHTML = `
-
-        <div class="idea-icon">
-          💡
-        </div>
-
-        <h3>
-          ${escapeHTML(idea.title)}
-        </h3>
-
-        <p>
-          ${escapeHTML(idea.description)}
-        </p>
-
-      `;
-
-
-      container.appendChild(card);
-
-    }
-  );
-
-}
-
-
-/* =====================================================
-   NEW IDEA
-===================================================== */
-
-$("#newIdeaButton")
-  ?.addEventListener(
-    "click",
-    () => {
-
-      const title =
-        prompt(
-          "اسم الفكرة:"
-        );
-
-
-      if (!title) return;
-
-
-      const description =
-        prompt(
-          "وصف الفكرة:"
-        ) || "";
-
-
-      state.ideas.unshift({
-
-        id: generateId(),
-
-        title:
-          title.trim(),
-
-        description:
-          description.trim(),
-
-        createdAt:
-          new Date().toISOString()
-
-      });
-
-
-      saveState();
-
-      renderIdeas();
-
-    }
-  );
-
-
-/* =====================================================
-   THEME
-===================================================== */
-
-function applyTheme() {
-
-  if (
-    state.theme === "light"
-  ) {
-
-    document.body.classList.add(
-      "light"
-    );
-
-  } else {
-
-    document.body.classList.remove(
-      "light"
-    );
-
-  }
-
-}
-
-
-function toggleTheme() {
-
-  state.theme =
-    state.theme === "dark"
-      ? "light"
-      : "dark";
-
-
-  saveState();
-
-  applyTheme();
-
-}
-
-
-$("#themeButton")
-  ?.addEventListener(
-    "click",
-    toggleTheme
-  );
-
-
-$("#settingsThemeButton")
-  ?.addEventListener(
-    "click",
-    toggleTheme
-  );
-
-
-/* =====================================================
-   CLEAR DATA
-===================================================== */
-
-$("#clearDataButton")
-  ?.addEventListener(
-    "click",
-    () => {
-
-      const confirmed =
-        confirm(
-          "هل أنت متأكد؟\n\nسيتم حذف جميع المشاريع والمهام والأفكار من هذا الجهاز."
-        );
-
-
-      if (!confirmed) return;
-
-
-      state = {
-
-        projects: [],
-
-        ideas: [],
-
-        theme: "dark"
-
-      };
-
-
-      saveState();
-
-      applyTheme();
-
-      renderAll();
-
-    }
-  );
-
-
-/* =====================================================
-   NOTIFICATIONS
-===================================================== */
-
-$("#notificationButton")
-  ?.addEventListener(
-    "click",
-    () => {
-
-      alert(
-        "🔔 لا توجد إشعارات جديدة."
-      );
-
-    }
-  );
-
-
-/* =====================================================
-   RENDER EVERYTHING
-===================================================== */
-
-function renderAll() {
-
-  renderStatistics();
-
-  renderActiveProject();
-
-  renderRecentProjects();
-
-  renderAllProjects();
-
-  renderTasks();
-
-  renderIdeas();
-
-}
-
-
-/* =====================================================
-   INITIALIZATION
-===================================================== */
-
-function init() {
-
-  loadState();
-
-  applyTheme();
-
-  renderAll();
-
-}
-
-
-/* =====================================================
-   START
-===================================================== */
-
-document.addEventListener(
-  "DOMContentLoaded",
-  init
-);
+  border-color: var(--border-hover
