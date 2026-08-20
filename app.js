@@ -1,453 +1,1343 @@
 /* =========================================================
    PROJECT ARENA V2
-   STYLE SYSTEM
+   APP.JS
 ========================================================= */
 
-:root {
-  --bg: #080a0f;
-  --bg-2: #0c0f16;
-  --surface: #11151d;
-  --surface-2: #151a23;
-  --surface-3: #1a202b;
+"use strict";
 
-  --border: rgba(255, 255, 255, 0.075);
-  --border-hover: rgba(255, 255, 255, 0.14);
+/* =========================================================
+   STORAGE
+========================================================= */
 
-  --text: #f4f6fa;
-  --muted: #8c94a3;
-  --muted-2: #646d7d;
+const STORAGE_KEY = "projectArenaV2";
 
-  --primary: #7c5cff;
-  --primary-2: #6245dc;
-  --primary-soft: rgba(124, 92, 255, 0.12);
+const defaultData = {
+  projects: [],
+  ideas: [],
+  tasks: [],
+  theme: "dark"
+};
 
-  --blue: #4b9cff;
-  --green: #35d99a;
-  --orange: #ffad51;
-  --red: #ff5f76;
-  --purple: #a179ff;
+let appData = loadData();
 
-  --sidebar: 245px;
-  --radius: 18px;
 
-  --shadow:
-    0 20px 60px rgba(0, 0, 0, 0.28);
+/* =========================================================
+   DOM
+========================================================= */
 
-  --transition: 0.2s ease;
+const $ = (selector) => document.querySelector(selector);
+const $$ = (selector) => document.querySelectorAll(selector);
+
+
+/* Pages */
+const pages = $$(".page");
+const navLinks = $$(".nav-link");
+
+
+/* Project elements */
+const projectModal = $("#projectModal");
+const projectForm = $("#projectForm");
+
+const projectName = $("#projectName");
+const projectDescription = $("#projectDescription");
+const projectStatus = $("#projectStatus");
+
+const activeProjectContainer = $("#activeProjectContainer");
+const recentProjects = $("#recentProjects");
+const allProjects = $("#allProjects");
+
+const totalProjects = $("#totalProjects");
+const activeProjects = $("#activeProjects");
+const completedProjects = $("#completedProjects");
+const overallProgress = $("#overallProgress");
+
+
+/* Buttons */
+const newProjectButton = $("#newProjectButton");
+const projectsNewButton = $("#projectsNewButton");
+
+const closeProjectModal = $("#closeProjectModal");
+const cancelProjectButton = $("#cancelProjectButton");
+
+const themeButton = $("#themeButton");
+const settingsThemeButton = $("#settingsThemeButton");
+
+const notificationButton = $("#notificationButton");
+const clearDataButton = $("#clearDataButton");
+
+const newIdeaButton = $("#newIdeaButton");
+
+const tasksContainer = $("#tasksContainer");
+const ideasContainer = $("#ideasContainer");
+
+
+/* =========================================================
+   LOAD / SAVE
+========================================================= */
+
+function loadData() {
+  try {
+    const saved = localStorage.getItem(STORAGE_KEY);
+
+    if (!saved) {
+      return structuredClone(defaultData);
+    }
+
+    const parsed = JSON.parse(saved);
+
+    return {
+      ...structuredClone(defaultData),
+      ...parsed,
+      projects: Array.isArray(parsed.projects)
+        ? parsed.projects
+        : [],
+      ideas: Array.isArray(parsed.ideas)
+        ? parsed.ideas
+        : [],
+      tasks: Array.isArray(parsed.tasks)
+        ? parsed.tasks
+        : []
+    };
+
+  } catch (error) {
+    console.error("Storage error:", error);
+
+    return structuredClone(defaultData);
+  }
+}
+
+
+function saveData() {
+  localStorage.setItem(
+    STORAGE_KEY,
+    JSON.stringify(appData)
+  );
 }
 
 
 /* =========================================================
-   RESET
+   UTILITIES
 ========================================================= */
 
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
+function generateId() {
+  return (
+    Date.now().toString(36) +
+    Math.random().toString(36).slice(2, 8)
+  );
 }
 
-html {
-  min-height: 100%;
-  scroll-behavior: smooth;
+
+function escapeHTML(value) {
+  if (value === null || value === undefined) {
+    return "";
+  }
+
+  return String(value)
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
 }
 
-body {
-  min-height: 100vh;
 
-  background:
-    radial-gradient(
-      circle at 85% 0%,
-      rgba(124, 92, 255, 0.10),
-      transparent 30%
-    ),
-    radial-gradient(
-      circle at 10% 80%,
-      rgba(77, 156, 255, 0.035),
-      transparent 28%
-    ),
-    var(--bg);
+function getStatusLabel(status) {
+  const labels = {
+    idea: "💡 فكرة",
+    active: "🟡 قيد التطوير",
+    completed: "🟢 مكتمل",
+    paused: "🔴 متوقف"
+  };
 
-  color: var(--text);
-
-  font-family:
-    "Segoe UI",
-    Tahoma,
-    Arial,
-    sans-serif;
-
-  line-height: 1.6;
-
-  overflow-x: hidden;
+  return labels[status] || "💡 فكرة";
 }
 
-button,
-input,
-textarea,
-select {
-  font-family: inherit;
+
+function getProgress(project) {
+  if (!project) return 0;
+
+  if (project.status === "completed") {
+    return 100;
+  }
+
+  const progress = Number(project.progress);
+
+  if (Number.isNaN(progress)) {
+    return 0;
+  }
+
+  return Math.max(
+    0,
+    Math.min(100, progress)
+  );
 }
 
-button {
-  -webkit-tap-highlight-color: transparent;
-}
 
-button:focus-visible,
-input:focus-visible,
-textarea:focus-visible,
-select:focus-visible {
-  outline: 2px solid var(--primary);
-  outline-offset: 2px;
-}
-
-::selection {
-  background: rgba(124, 92, 255, 0.35);
-  color: #fff;
+function formatDate(date) {
+  try {
+    return new Date(date).toLocaleDateString(
+      "ar-IQ",
+      {
+        day: "numeric",
+        month: "short",
+        year: "numeric"
+      }
+    );
+  } catch {
+    return "";
+  }
 }
 
 
 /* =========================================================
-   SCROLLBAR
+   NAVIGATION
 ========================================================= */
 
-::-webkit-scrollbar {
-  width: 7px;
+function showPage(pageId) {
+
+  pages.forEach((page) => {
+    page.classList.toggle(
+      "active",
+      page.id === pageId
+    );
+  });
+
+  navLinks.forEach((link) => {
+    link.classList.toggle(
+      "active",
+      link.dataset.page === pageId
+    );
+  });
+
+  window.scrollTo({
+    top: 0,
+    behavior: "smooth"
+  });
 }
 
-::-webkit-scrollbar-track {
-  background: transparent;
+
+navLinks.forEach((link) => {
+
+  link.addEventListener("click", () => {
+
+    const page = link.dataset.page;
+
+    if (page) {
+      showPage(page);
+    }
+
+  });
+
+});
+
+
+/* Buttons with data-page-target */
+
+$$("[data-page-target]").forEach((button) => {
+
+  button.addEventListener("click", () => {
+
+    const page = button.dataset.pageTarget;
+
+    if (page) {
+      showPage(page);
+    }
+
+  });
+
+});
+
+
+/* =========================================================
+   PROJECT MODAL
+========================================================= */
+
+function openProjectModal() {
+
+  projectModal.classList.add("show");
+
+  setTimeout(() => {
+    projectName.focus();
+  }, 100);
+
 }
 
-::-webkit-scrollbar-thumb {
-  background: #252b36;
-  border-radius: 50px;
+
+function closeModal() {
+
+  projectModal.classList.remove("show");
+
+  projectForm.reset();
+
 }
 
-::-webkit-scrollbar-thumb:hover {
-  background: #343c4b;
+
+newProjectButton?.addEventListener(
+  "click",
+  openProjectModal
+);
+
+
+projectsNewButton?.addEventListener(
+  "click",
+  openProjectModal
+);
+
+
+closeProjectModal?.addEventListener(
+  "click",
+  closeModal
+);
+
+
+cancelProjectButton?.addEventListener(
+  "click",
+  closeModal
+);
+
+
+projectModal?.addEventListener(
+  "click",
+  (event) => {
+
+    if (event.target === projectModal) {
+      closeModal();
+    }
+
+  }
+);
+
+
+document.addEventListener(
+  "keydown",
+  (event) => {
+
+    if (
+      event.key === "Escape" &&
+      projectModal.classList.contains("show")
+    ) {
+      closeModal();
+    }
+
+  }
+);
+
+
+/* =========================================================
+   CREATE PROJECT
+========================================================= */
+
+projectForm?.addEventListener(
+  "submit",
+  (event) => {
+
+    event.preventDefault();
+
+    const name =
+      projectName.value.trim();
+
+    const description =
+      projectDescription.value.trim();
+
+    const status =
+      projectStatus.value;
+
+    if (!name) {
+      projectName.focus();
+      return;
+    }
+
+    const project = {
+
+      id: generateId(),
+
+      name,
+
+      description:
+        description ||
+        "لا يوجد وصف للمشروع.",
+
+      status,
+
+      progress:
+        status === "completed"
+          ? 100
+          : 0,
+
+      createdAt:
+        new Date().toISOString(),
+
+      updatedAt:
+        new Date().toISOString()
+
+    };
+
+
+    appData.projects.unshift(project);
+
+    saveData();
+
+    renderAll();
+
+    closeModal();
+
+    showPage("projects");
+
+  }
+);
+
+
+/* =========================================================
+   PROJECT CARD
+========================================================= */
+
+function projectCard(project) {
+
+  const progress =
+    getProgress(project);
+
+  return `
+
+    <article
+      class="project-card"
+      data-project-id="${escapeHTML(project.id)}"
+    >
+
+      <div class="project-top">
+
+        <div style="min-width:0;">
+
+          <div class="project-title">
+            ${escapeHTML(project.name)}
+          </div>
+
+          <div class="project-description">
+            ${escapeHTML(project.description)}
+          </div>
+
+        </div>
+
+        <span class="status ${escapeHTML(project.status)}">
+          ${getStatusLabel(project.status)}
+        </span>
+
+      </div>
+
+
+      <div class="progress-area">
+
+        <div class="progress-header">
+
+          <span>نسبة الإنجاز</span>
+
+          <strong>${progress}%</strong>
+
+        </div>
+
+        <div class="progress-bar">
+
+          <div
+            class="progress-value"
+            style="width:${progress}%"
+          ></div>
+
+        </div>
+
+      </div>
+
+
+      <div
+        style="
+          display:flex;
+          align-items:center;
+          justify-content:space-between;
+          gap:8px;
+          margin-top:15px;
+        "
+      >
+
+        <span
+          style="
+            color:var(--text-muted);
+            font-size:9px;
+          "
+        >
+          ${formatDate(project.createdAt)}
+        </span>
+
+        <button
+          class="danger-btn delete-project-btn"
+          data-id="${escapeHTML(project.id)}"
+          style="
+            min-height:32px;
+            padding:6px 10px;
+            font-size:9px;
+          "
+        >
+          حذف
+        </button>
+
+      </div>
+
+    </article>
+
+  `;
 }
 
 
 /* =========================================================
-   APP SHELL
+   RENDER PROJECTS
 ========================================================= */
 
-.app-shell {
-  min-height: 100vh;
-}
+function renderProjects() {
+
+  const projects =
+    appData.projects;
+
+  /* All projects */
+
+  if (!projects.length) {
+
+    allProjects.innerHTML = `
+
+      <div class="empty-state">
+
+        <div class="empty-icon">⚔</div>
+
+        <h3>ما عندك مشاريع حاليًا</h3>
+
+        <p>
+          ابدأ أول مشروع وخليه يظهر هنا.
+        </p>
+
+        <button
+          class="primary-btn"
+          id="emptyNewProject"
+          style="margin-top:15px;"
+        >
+          ＋ مشروع جديد
+        </button>
+
+      </div>
+
+    `;
+
+  } else {
+
+    allProjects.innerHTML =
+      projects
+        .map(projectCard)
+        .join("");
+
+  }
 
 
-/* =========================================================
-   SIDEBAR
-========================================================= */
+  /* Recent */
 
-.sidebar {
-  position: fixed;
+  const recent =
+    projects.slice(0, 6);
 
-  top: 0;
-  right: 0;
+  if (!recent.length) {
 
-  width: var(--sidebar);
-  height: 100vh;
+    recentProjects.innerHTML = `
 
-  padding: 22px 15px;
+      <div class="empty-state">
 
-  display: flex;
-  flex-direction: column;
+        <div class="empty-icon">◈</div>
 
-  background:
-    linear-gradient(
-      180deg,
-      rgba(17, 21, 29, 0.98),
-      rgba(8, 10, 15, 0.99)
+        <h3>لا توجد مشاريع</h3>
+
+        <p>
+          أضف مشروعك الأول للبدء.
+        </p>
+
+      </div>
+
+    `;
+
+  } else {
+
+    recentProjects.innerHTML =
+      recent
+        .map(projectCard)
+        .join("");
+
+  }
+
+
+  /* Active project */
+
+  const active =
+    projects.find(
+      project =>
+        project.status === "active"
     );
 
-  border-left: 1px solid var(--border);
+  if (!active) {
 
-  z-index: 1000;
+    activeProjectContainer.innerHTML = `
+
+      <div class="empty-state">
+
+        <div class="empty-icon">◷</div>
+
+        <h3>لا يوجد مشروع نشط</h3>
+
+        <p>
+          عندما تبدأ مشروعًا سيظهر هنا.
+        </p>
+
+      </div>
+
+    `;
+
+  } else {
+
+    activeProjectContainer.innerHTML =
+      projectCard(active);
+
+  }
+
 }
 
 
 /* =========================================================
-   LOGO
+   PROJECT ACTIONS
 ========================================================= */
 
-.logo-area {
-  display: flex;
+document.addEventListener(
+  "click",
+  (event) => {
 
-  align-items: center;
+    const deleteButton =
+      event.target.closest(
+        ".delete-project-btn"
+      );
 
-  gap: 11px;
+    if (deleteButton) {
 
-  padding:
-    2px
-    8px
-    27px;
-}
+      event.stopPropagation();
 
-.logo {
-  width: 43px;
-  height: 43px;
+      const id =
+        deleteButton.dataset.id;
 
-  flex-shrink: 0;
+      deleteProject(id);
 
-  display: grid;
-  place-items: center;
+      return;
+    }
 
-  border-radius: 13px;
 
-  color: #fff;
+    const emptyButton =
+      event.target.closest(
+        "#emptyNewProject"
+      );
 
-  font-size: 20px;
+    if (emptyButton) {
+      openProjectModal();
+      return;
+    }
 
-  background:
-    linear-gradient(
-      135deg,
-      var(--primary),
-      var(--primary-2)
+  }
+);
+
+
+function deleteProject(id) {
+
+  const project =
+    appData.projects.find(
+      item => item.id === id
     );
 
-  box-shadow:
-    0 12px 30px rgba(124, 92, 255, 0.22);
-}
-
-.logo-area h1 {
-  font-size: 15px;
-
-  font-weight: 800;
-
-  letter-spacing: -0.3px;
-
-  white-space: nowrap;
-}
-
-.logo-area span {
-  display: block;
-
-  margin-top: 1px;
-
-  color: var(--muted-2);
-
-  font-size: 9px;
-
-  letter-spacing: 0.7px;
-
-  text-transform: uppercase;
-}
+  if (!project) return;
 
 
-/* =========================================================
-   SIDEBAR NAV
-========================================================= */
-
-.sidebar-nav {
-  display: flex;
-
-  flex-direction: column;
-
-  gap: 6px;
-}
-
-.nav-link {
-  width: 100%;
-
-  min-height: 45px;
-
-  padding: 9px 12px;
-
-  display: flex;
-
-  align-items: center;
-
-  gap: 11px;
-
-  border: 1px solid transparent;
-
-  border-radius: 12px;
-
-  background: transparent;
-
-  color: var(--muted);
-
-  cursor: pointer;
-
-  text-align: right;
-
-  transition:
-    background var(--transition),
-    color var(--transition),
-    border-color var(--transition),
-    transform var(--transition);
-}
-
-.nav-link span {
-  width: 22px;
-
-  display: grid;
-  place-items: center;
-
-  color: #737c8c;
-
-  font-size: 17px;
-}
-
-.nav-link b {
-  font-size: 12px;
-
-  font-weight: 600;
-}
-
-.nav-link:hover {
-  color: var(--text);
-
-  background:
-    rgba(255, 255, 255, 0.035);
-
-  border-color: var(--border);
-
-  transform: translateX(-2px);
-}
-
-.nav-link:hover span {
-  color: var(--text);
-}
-
-.nav-link.active {
-  color: #fff;
-
-  background:
-    linear-gradient(
-      90deg,
-      rgba(124, 92, 255, 0.17),
-      rgba(124, 92, 255, 0.055)
+  const confirmed =
+    confirm(
+      `هل تريد حذف المشروع "${project.name}"؟`
     );
 
-  border-color:
-    rgba(124, 92, 255, 0.17);
-}
-
-.nav-link.active span {
-  color: var(--primary);
-}
+  if (!confirmed) return;
 
 
-/* =========================================================
-   SIDEBAR FOOTER
-========================================================= */
-
-.sidebar-footer {
-  margin-top: auto;
-}
-
-.sidebar-footer small {
-  display: block;
-
-  margin-top: 15px;
-
-  color: #505968;
-
-  font-size: 9px;
-
-  text-align: center;
-}
-
-
-/* =========================================================
-   MAIN
-========================================================= */
-
-.main-content {
-  min-height: 100vh;
-
-  margin-right: var(--sidebar);
-
-  padding:
-    0
-    34px
-    60px;
-}
-
-
-/* =========================================================
-   TOPBAR
-========================================================= */
-
-.topbar {
-  height: 74px;
-
-  display: flex;
-
-  align-items: center;
-
-  justify-content: space-between;
-
-  border-bottom: 1px solid var(--border);
-
-  margin-bottom: 34px;
-}
-
-.mobile-title {
-  display: none;
-
-  align-items: center;
-
-  gap: 9px;
-}
-
-.mobile-title strong {
-  font-size: 13px;
-}
-
-.mini-logo {
-  width: 34px;
-  height: 34px;
-
-  display: grid;
-  place-items: center;
-
-  border-radius: 10px;
-
-  background:
-    linear-gradient(
-      135deg,
-      var(--primary),
-      var(--primary-2)
+  appData.projects =
+    appData.projects.filter(
+      item => item.id !== id
     );
 
-  font-size: 16px;
+
+  /* حذف مهام المشروع */
+
+  appData.tasks =
+    appData.tasks.filter(
+      task => task.projectId !== id
+    );
+
+
+  saveData();
+
+  renderAll();
+
 }
 
-.topbar-actions {
-  display: flex;
 
-  gap: 8px;
+/* =========================================================
+   STATISTICS
+========================================================= */
+
+function renderStats() {
+
+  const projects =
+    appData.projects;
+
+  const total =
+    projects.length;
+
+  const active =
+    projects.filter(
+      p => p.status === "active"
+    ).length;
+
+  const completed =
+    projects.filter(
+      p => p.status === "completed"
+    ).length;
+
+
+  let progress = 0;
+
+  if (projects.length) {
+
+    const sum =
+      projects.reduce(
+        (total, project) =>
+          total + getProgress(project),
+        0
+      );
+
+    progress =
+      Math.round(
+        sum / projects.length
+      );
+
+  }
+
+
+  totalProjects.textContent =
+    total;
+
+  activeProjects.textContent =
+    active;
+
+  completedProjects.textContent =
+    completed;
+
+  overallProgress.textContent =
+    `${progress}%`;
+
 }
 
-.round-btn {
-  width: 40px;
-  height: 40px;
 
-  display: grid;
-  place-items: center;
+/* =========================================================
+   TASKS
+========================================================= */
 
-  border: 1px solid var(--border);
+function renderTasks() {
 
-  border-radius: 11px;
+  if (!appData.tasks.length) {
 
-  background: var(--surface);
+    tasksContainer.innerHTML = `
 
-  color: var(--muted);
+      <div class="empty-state">
 
-  cursor: pointer;
+        <div class="empty-icon">✓</div>
 
-  font-size: 16px;
+        <h3>لا توجد مهام</h3>
 
-  transition: var(--transition);
+        <p>
+          المهام المرتبطة بالمشاريع ستظهر هنا.
+        </p>
+
+      </div>
+
+    `;
+
+    return;
+  }
+
+
+  tasksContainer.innerHTML =
+    appData.tasks
+      .map(task => {
+
+        const project =
+          appData.projects.find(
+            p => p.id === task.projectId
+          );
+
+        return `
+
+          <div class="task-item">
+
+            <button
+              class="task-check ${
+                task.completed
+                  ? "completed"
+                  : ""
+              }"
+              data-task-id="${escapeHTML(task.id)}"
+            >
+              ${
+                task.completed
+                  ? "✓"
+                  : ""
+              }
+            </button>
+
+
+            <div style="flex:1;min-width:0;">
+
+              <div
+                class="task-name ${
+                  task.completed
+                    ? "completed"
+                    : ""
+                }"
+              >
+                ${escapeHTML(task.name)}
+              </div>
+
+              ${
+                project
+                  ? `
+                    <div
+                      style="
+                        color:var(--text-muted);
+                        font-size:8px;
+                        margin-top:2px;
+                      "
+                    >
+                      ${escapeHTML(project.name)}
+                    </div>
+                  `
+                  : ""
+              }
+
+            </div>
+
+          </div>
+
+        `;
+
+      })
+      .join("");
+
 }
 
-.round-btn:hover {
-  color: var(--text);
 
-  background: var(--surface-2);
+document.addEventListener(
+  "click",
+  (event) => {
 
-  border-color: var(--border-hover
+    const button =
+      event.target.closest(
+        ".task-check"
+      );
+
+    if (!button) return;
+
+    const id =
+      button.dataset.taskId;
+
+    const task =
+      appData.tasks.find(
+        item => item.id === id
+      );
+
+    if (!task) return;
+
+    task.completed =
+      !task.completed;
+
+    saveData();
+
+    renderTasks();
+
+  }
+);
+
+
+/* =========================================================
+   IDEAS
+========================================================= */
+
+function renderIdeas() {
+
+  if (!appData.ideas.length) {
+
+    ideasContainer.innerHTML = `
+
+      <div class="empty-state">
+
+        <div class="empty-icon">✦</div>
+
+        <h3>خزنة الأفكار فارغة</h3>
+
+        <p>
+          أضف فكرة جديدة حتى لا تضيع منك.
+        </p>
+
+        <button
+          class="primary-btn"
+          id="emptyNewIdea"
+          style="margin-top:15px;"
+        >
+          ＋ فكرة جديدة
+        </button>
+
+      </div>
+
+    `;
+
+    return;
+  }
+
+
+  ideasContainer.innerHTML =
+    appData.ideas
+      .map(idea => `
+
+        <article
+          class="idea-card"
+          data-idea-id="${escapeHTML(idea.id)}"
+        >
+
+          <div class="idea-icon">
+            💡
+          </div>
+
+          <h3>
+            ${escapeHTML(idea.title)}
+          </h3>
+
+          <p>
+            ${escapeHTML(idea.description)}
+          </p>
+
+          <div
+            style="
+              display:flex;
+              align-items:center;
+              justify-content:space-between;
+              margin-top:13px;
+            "
+          >
+
+            <span
+              style="
+                color:var(--text-muted);
+                font-size:8px;
+              "
+            >
+              ${formatDate(idea.createdAt)}
+            </span>
+
+            <button
+              class="danger-btn delete-idea-btn"
+              data-id="${escapeHTML(idea.id)}"
+              style="
+                min-height:30px;
+                padding:5px 9px;
+                font-size:8px;
+              "
+            >
+              حذف
+            </button>
+
+          </div>
+
+        </article>
+
+      `)
+      .join("");
+
+}
+
+
+/* =========================================================
+   ADD IDEA
+========================================================= */
+
+function createIdea() {
+
+  const title =
+    prompt(
+      "اكتب اسم الفكرة:"
+    );
+
+  if (!title || !title.trim()) {
+    return;
+  }
+
+
+  const description =
+    prompt(
+      "اكتب وصفًا مختصرًا للفكرة:"
+    );
+
+
+  const idea = {
+
+    id: generateId(),
+
+    title:
+      title.trim(),
+
+    description:
+      description?.trim() ||
+      "لا يوجد وصف.",
+
+    createdAt:
+      new Date().toISOString()
+
+  };
+
+
+  appData.ideas.unshift(idea);
+
+  saveData();
+
+  renderIdeas();
+
+}
+
+
+newIdeaButton?.addEventListener(
+  "click",
+  createIdea
+);
+
+
+document.addEventListener(
+  "click",
+  (event) => {
+
+    if (
+      event.target.closest(
+        "#emptyNewIdea"
+      )
+    ) {
+      createIdea();
+      return;
+    }
+
+
+    const deleteButton =
+      event.target.closest(
+        ".delete-idea-btn"
+      );
+
+    if (!deleteButton) return;
+
+
+    const id =
+      deleteButton.dataset.id;
+
+    const idea =
+      appData.ideas.find(
+        item => item.id === id
+      );
+
+    if (!idea) return;
+
+
+    if (
+      confirm(
+        `هل تريد حذف الفكرة "${idea.title}"؟`
+      )
+    ) {
+
+      appData.ideas =
+        appData.ideas.filter(
+          item => item.id !== id
+        );
+
+      saveData();
+
+      renderIdeas();
+
+    }
+
+  }
+);
+
+
+/* =========================================================
+   THEME
+========================================================= */
+
+function applyTheme() {
+
+  if (appData.theme === "light") {
+
+    document.body.classList.add(
+      "light"
+    );
+
+  } else {
+
+    document.body.classList.remove(
+      "light"
+    );
+
+  }
+
+}
+
+
+function toggleTheme() {
+
+  appData.theme =
+    appData.theme === "light"
+      ? "dark"
+      : "light";
+
+  saveData();
+
+  applyTheme();
+
+}
+
+
+themeButton?.addEventListener(
+  "click",
+  toggleTheme
+);
+
+
+settingsThemeButton?.addEventListener(
+  "click",
+  toggleTheme
+);
+
+
+/* =========================================================
+   NOTIFICATIONS
+========================================================= */
+
+notificationButton?.addEventListener(
+  "click",
+  () => {
+
+    const tasks =
+      appData.tasks.filter(
+        task => !task.completed
+      ).length;
+
+    const active =
+      appData.projects.filter(
+        project =>
+          project.status === "active"
+      ).length;
+
+
+    if (!tasks && !active) {
+
+      alert(
+        "🔔 لا توجد إشعارات جديدة حاليًا."
+      );
+
+      return;
+    }
+
+
+    alert(
+      `🔔 إشعارات Project Arena\n\n` +
+      `المشاريع قيد التطوير: ${active}\n` +
+      `المهام غير المكتملة: ${tasks}`
+    );
+
+  }
+);
+
+
+/* =========================================================
+   CLEAR DATA
+========================================================= */
+
+clearDataButton?.addEventListener(
+  "click",
+  () => {
+
+    const confirmed =
+      confirm(
+        "⚠️ سيتم حذف جميع المشاريع والأفكار والمهام من هذا الجهاز.\n\nهل أنت متأكد؟"
+      );
+
+    if (!confirmed) return;
+
+
+    appData =
+      structuredClone(defaultData);
+
+    saveData();
+
+    applyTheme();
+
+    renderAll();
+
+    showPage("dashboard");
+
+    alert(
+      "تم حذف البيانات بنجاح."
+    );
+
+  }
+);
+
+
+/* =========================================================
+   SAMPLE TASKS
+========================================================= */
+
+function createTasksForProject(project) {
+
+  if (!project) return;
+
+
+  const exists =
+    appData.tasks.some(
+      task =>
+        task.projectId === project.id
+    );
+
+  if (exists) return;
+
+
+  appData.tasks.push(
+
+    {
+      id: generateId(),
+
+      projectId:
+        project.id,
+
+      name:
+        "تحديد فكرة المشروع",
+
+      completed:
+        project.progress >= 25
+    },
+
+    {
+      id: generateId(),
+
+      projectId:
+        project.id,
+
+      name:
+        "تجهيز التصميم",
+
+      completed:
+        project.progress >= 50
+    },
+
+    {
+      id: generateId(),
+
+      projectId:
+        project.id,
+
+      name:
+        "برمجة المشروع",
+
+      completed:
+        project.progress >= 75
+    },
+
+    {
+      id: generateId(),
+
+      projectId:
+        project.id,
+
+      name:
+        "اختبار المشروع",
+
+      completed:
+        project.status === "completed"
+    }
+
+  );
+
+}
+
+
+/* =========================================================
+   INITIALIZE PROJECT TASKS
+========================================================= */
+
+function initializeTasks() {
+
+  let changed = false;
+
+
+  appData.projects.forEach(
+    project => {
+
+      const before =
+        appData.tasks.length;
+
+      createTasksForProject(project);
+
+      if (
+        appData.tasks.length !== before
+      ) {
+        changed = true;
+      }
+
+    }
+  );
+
+
+  if (changed) {
+    saveData();
+  }
+
+}
+
+
+/* =========================================================
+   RENDER EVERYTHING
+========================================================= */
+
+function renderAll() {
+
+  renderStats();
+
+  renderProjects();
+
+  renderTasks();
+
+  renderIdeas();
+
+}
+
+
+/* =========================================================
+   START APP
+========================================================= */
+
+function init() {
+
+  applyTheme();
+
+  initializeTasks();
+
+  renderAll();
+
+  showPage("dashboard");
+
+}
+
+
+init();
